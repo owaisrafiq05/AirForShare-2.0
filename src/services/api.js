@@ -73,6 +73,12 @@ const filesApi = {
   getPrivateFile: async (filename) => {
     const response = await api.get(`/files/private/${filename}`);
     return response.data;
+  },
+  
+  // Delete a private file
+  deletePrivateFile: async (publicId) => {
+    const response = await api.delete(`/files/private/${publicId}`);
+    return response.data;
   }
 };
 

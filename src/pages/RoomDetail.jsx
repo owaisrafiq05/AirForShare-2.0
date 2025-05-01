@@ -43,7 +43,6 @@ const RoomDetail = () => {
     on('roomInfo', handleRoomInfo);
     on('userJoined', handleUserJoined);
     on('message', handleMessage);
-    on('newFile', handleNewFile);
     on('userLeft', handleUserLeft);
     
     // Clean up event listeners on unmount
@@ -51,7 +50,6 @@ const RoomDetail = () => {
       off('roomInfo', handleRoomInfo);
       off('userJoined', handleUserJoined);
       off('message', handleMessage);
-      off('newFile', handleNewFile);
       off('userLeft', handleUserLeft);
     };
   }, [roomId, username]);
@@ -110,21 +108,29 @@ const RoomDetail = () => {
   };
   
   const handleMessage = (data) => {
-    // Add new message to the list
+    // Add new message to the list (could be text or file message)
     setMessages(prevMessages => [...prevMessages, data]);
   };
   
-  const handleNewFile = (data) => {
-    // Add file info as a message
-    setMessages(prevMessages => [...prevMessages, data]);
+  const handleSendMessage = (messageText, fileData) => {
+    if (fileData) {
+      // If there's a file, share the file info
+      shareFileInfo(roomId, fileData);
+    } else {
+      // Regular text message
+      sendMessage(roomId, messageText);
+    }
   };
   
-  const handleSendMessage = (messageText) => {
-    sendMessage(roomId, messageText);
+  const handleDeleteMessage = (message) => {
+    // Remove the deleted message from the messages array
+    setMessages(prevMessages => prevMessages.filter(m => 
+      !(m.fileInfo && message.fileInfo && m.fileInfo.publicId === message.fileInfo.publicId)
+    ));
   };
   
   const handleUploadSuccess = (fileData) => {
-    // Share the file info with the room
+    // Share the file info with the room (from the FileUpload component)
     shareFileInfo(roomId, fileData);
   };
   
@@ -221,6 +227,7 @@ const RoomDetail = () => {
               messages={messages}
               currentUser={currentUser}
               onSendMessage={handleSendMessage}
+              onDeleteMessage={handleDeleteMessage}
             />
           </div>
         </div>
